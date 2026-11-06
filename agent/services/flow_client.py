@@ -916,7 +916,8 @@ class FlowClient:
             pid = self._batch_project_id(project_id)
             if end_image_media_id:
                 model = fb.resolve_first_last_model(
-                    VIDEO_MODELS.get(user_paygate_tier, {}).get("start_end_frame_2_video", {}).get(aspect_ratio))
+                    VIDEO_MODELS.get(user_paygate_tier, {}).get("start_end_frame_2_video", {}).get(aspect_ratio),
+                    aspect_ratio)
                 rpcid = fb.RPC_GEN_VIDEO_FIRST_LAST
                 freq = fb.first_last_request(
                     prompt, pid, start_image_media_id, end_image_media_id, model, aspect=aspect_ratio)

@@ -199,6 +199,10 @@ class TestVideoRequest:
         assert fb.resolve_first_last_model("veo_3_1_i2v_s_fast_fl") == "veo_3_1_i2v_s_fast_ultra_fl"
         assert fb.resolve_first_last_model("veo_3_1_i2v_s_lite_4s_fl") == "veo_3_1_i2v_s_fast_ultra_fl"
         assert fb.resolve_first_last_model(None) == fb.FIRST_LAST_VIDEO_MODEL
+        assert fb.resolve_first_last_model(None, "VIDEO_ASPECT_RATIO_PORTRAIT") == \
+            "veo_3_1_i2v_s_fast_portrait_ultra_fl"
+        assert fb.resolve_first_last_model("veo_3_1_i2v_s_fast_portrait_ultra_fl",
+                                           "VIDEO_ASPECT_RATIO_PORTRAIT") == "veo_3_1_i2v_s_fast_portrait_ultra_fl"
 
     def test_omni_reference_matches_live_mzza6b_shape(self):
         freq = fb.omni_reference_video_request(

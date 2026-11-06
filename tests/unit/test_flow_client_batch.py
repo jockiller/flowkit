@@ -275,9 +275,20 @@ class TestGenerateVideo:
         assert client.calls[0]["rpcid"] == fb.RPC_GEN_VIDEO_FIRST_LAST
         assert client.calls[0]["captcha"] == fb.CAPTCHA_VIDEO
         request = json.loads(json.loads(client.calls[0]["freq"])[0][0][1])[0][0]
-        assert request[1] in fb.FIRST_LAST_VIDEO_MODELS
+        assert request[1] == "veo_3_1_i2v_s_fast_ultra_fl"
         assert request[4][1] == "start-mid"
         assert request[5][1] == "end-mid"
+
+    async def test_portrait_start_and_end_frames_use_the_portrait_model(self, client):
+        """Captured 2026-11-06: portrait has its own name and aspect slot 1."""
+        client.responses[fb.RPC_GEN_VIDEO_FIRST_LAST] = {
+            "data": envelope(fb.RPC_GEN_VIDEO_FIRST_LAST, [None, 50, [[OPERATION, PROJECT, "scene", None]]])}
+        await client.generate_video("start-mid", "go", PROJECT, "scene-1",
+                                    aspect_ratio="VIDEO_ASPECT_RATIO_PORTRAIT",
+                                    end_image_media_id="end-mid")
+
+        request = json.loads(json.loads(client.calls[0]["freq"])[0][0][1])[0][0]
+        assert request[1:3] == ["veo_3_1_i2v_s_fast_portrait_ultra_fl", fb.VIDEO_ASPECT_PORTRAIT]
 
     async def test_r2v_fails_loudly_by_default(self, client):
         result = await client.generate_video_from_references(["a", "b"], "go", PROJECT, "s")

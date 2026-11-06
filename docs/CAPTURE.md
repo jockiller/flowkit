@@ -24,7 +24,7 @@ request bodies to disk, so it goes in for one session and comes straight back ou
 Missing, and each blocked behind a capture: **video upscale**, **r2v**, and the
 **base-image** variant of the image edit. Veo **start+end-frame chaining** was
 captured on 2026-11-06: `nprQif`, the Omni first+last shape with a Veo `_fl`
-model (`veo_3_1_i2v_s_fast_ultra_fl`, 8 s).
+model (`veo_3_1_i2v_s_fast_ultra_fl`, portrait `veo_3_1_i2v_s_fast_portrait_ultra_fl`, 8 s).
 
 ## Recording one
 

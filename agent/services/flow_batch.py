@@ -118,12 +118,14 @@ VIDEO_MODELS = {
 }
 
 #: Veo start+end frame models (RPC ``nprQif``), 8 s. Unlike plain i2v the
-#: ``_fl`` chaining marker is part of the name: Fast on the Ultra plan says
-#: ``fast_ultra_`` (plain ``fast_`` is refused with MODEL_ACCESS_DENIED) and
-#: Quality says nothing. Only names captured off the live UI go here —
-#: 2026-11-06: Fast 8 s (default), Quality 8 s.
+#: ``_fl`` chaining marker is part of the name, and so is portrait: Fast on the
+#: Ultra plan says ``fast_ultra_`` / ``fast_portrait_ultra_`` (plain ``fast_``
+#: is refused with MODEL_ACCESS_DENIED), Quality says nothing. Only names
+#: captured off the live UI go here — 2026-11-06: Fast 8 s landscape and
+#: portrait (defaults), Quality 8 s landscape.
 FIRST_LAST_VIDEO_MODEL = "veo_3_1_i2v_s_fast_ultra_fl"
-FIRST_LAST_VIDEO_MODELS = {FIRST_LAST_VIDEO_MODEL, "veo_3_1_i2v_s_fl"}
+FIRST_LAST_VIDEO_MODEL_PORTRAIT = "veo_3_1_i2v_s_fast_portrait_ultra_fl"
+FIRST_LAST_VIDEO_MODELS = {FIRST_LAST_VIDEO_MODEL, FIRST_LAST_VIDEO_MODEL_PORTRAIT, "veo_3_1_i2v_s_fl"}
 
 #: Video aspect, and note it does NOT share the image encoding: here 1 is
 #: portrait, where for an image 1 is square. Measured by rendering one of each
@@ -254,9 +256,12 @@ def resolve_video_model(key: Optional[str]) -> str:
     return VIDEO_MODEL
 
 
-def resolve_first_last_model(key: Optional[str]) -> str:
-    """A captured Veo start+end model name, else the default one."""
-    return key if key in FIRST_LAST_VIDEO_MODELS else FIRST_LAST_VIDEO_MODEL
+def resolve_first_last_model(key: Optional[str], aspect: Any = VIDEO_ASPECT_LANDSCAPE) -> str:
+    """A captured Veo start+end model name, else the default for the aspect."""
+    if key in FIRST_LAST_VIDEO_MODELS:
+        return key
+    portrait = resolve_video_aspect(aspect) == VIDEO_ASPECT_PORTRAIT
+    return FIRST_LAST_VIDEO_MODEL_PORTRAIT if portrait else FIRST_LAST_VIDEO_MODEL
 
 
 def resolve_aspect(aspect: Any) -> int:

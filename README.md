@@ -22,7 +22,7 @@
 >
 > Every Omni 1.1 Flash video mode is ported and live-verified: text-to-video,
 > first frame, first+last frame, and references. Veo start+end-frame chaining
-> runs on `nprQif` (captured 2026-11-06; model `veo_3_1_i2v_s_fast_ultra_fl`,
+> runs on `nprQif` (captured 2026-11-06; model `veo_3_1_i2v_s_fast_ultra_fl`, portrait `veo_3_1_i2v_s_fast_portrait_ultra_fl`,
 > 8 s). Two capabilities remain unported on the **Veo** path because their
 > payloads were never captured off the new UI — **video upscale** and **Veo
 > reference-to-video**. They fail loudly with `UNSUPPORTED_ON_BATCH_API`
@@ -485,7 +485,7 @@ Three capabilities have no captured payload, so they fail with
 |---|---|---|
 | 4K/1080p upscale (`/fk-pipeline` last step) | unported | none — keep the 1080p render |
 | Veo reference-to-video (r2v) | unported | Omni r2v (`model_family=omni_flash`), or `FLOW_ALLOW_DEGRADED=1` → i2v off the first reference |
-| Veo start+end-frame chaining (`/fk-gen-chain-videos`) | `nprQif`, model `veo_3_1_i2v_s_fast_ultra_fl` (8 s) | — |
+| Veo start+end-frame chaining (`/fk-gen-chain-videos`) | `nprQif`, model `veo_3_1_i2v_s_fast_ultra_fl`, portrait `veo_3_1_i2v_s_fast_portrait_ultra_fl` (8 s) | — |
 | Omni Flash text-to-video | ported | `POST /api/flow/generate-video-omni-text` (4/6/8/10s) |
 | Omni Flash frame / first+last / reference modes | ported | `eb1hJf`, `nprQif`, `MZZa6b` — `POST /api/flow/generate-video` with `model_family=omni_flash` |
 
