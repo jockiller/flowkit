@@ -909,28 +909,25 @@ class FlowClient:
                               aspect_ratio: str = "VIDEO_ASPECT_RATIO_PORTRAIT",
                               end_image_media_id: str = None,
                               user_paygate_tier: str = "PAYGATE_TIER_TWO") -> dict:
-        """Submit an i2v generation. Returns operations for the poller."""
+        """Submit an i2v generation, or start+end frames when an end frame is
+        given. Returns operations for the poller."""
 
-        if end_image_media_id:
-            if not FLOW_ALLOW_DEGRADED:
-                return {"error": _unsupported(
-                    "start+end frame chaining",
-                    "the new payload's end-image slot was never captured",
-                )}
-            logger.warning(
-                "Scene %s: dropping end frame %s — chaining is not on the batch path, "
-                "running plain i2v because FLOW_ALLOW_DEGRADED=1",
-                str(scene_id)[:12], end_image_media_id[:12])
-
-        gen_type = "start_end_frame_2_video" if end_image_media_id else "frame_2_video"
         try:
             pid = self._batch_project_id(project_id)
-            freq = fb.video_request(
-                prompt, pid, start_image_media_id, aspect=aspect_ratio,
-                model=self._batch_video_model(user_paygate_tier, gen_type, aspect_ratio),
-            )
+            if end_image_media_id:
+                model = fb.resolve_first_last_model(
+                    VIDEO_MODELS.get(user_paygate_tier, {}).get("start_end_frame_2_video", {}).get(aspect_ratio))
+                rpcid = fb.RPC_GEN_VIDEO_FIRST_LAST
+                freq = fb.first_last_request(
+                    prompt, pid, start_image_media_id, end_image_media_id, model, aspect=aspect_ratio)
+            else:
+                rpcid = fb.RPC_GEN_VIDEO
+                freq = fb.video_request(
+                    prompt, pid, start_image_media_id, aspect=aspect_ratio,
+                    model=self._batch_video_model(user_paygate_tier, "frame_2_video", aspect_ratio),
+                )
             payload = await self._batch_payload(
-                fb.RPC_GEN_VIDEO, freq, fb.CAPTCHA_VIDEO, timeout=120)
+                rpcid, freq, fb.CAPTCHA_VIDEO, timeout=120)
             operation = fb.read_operation(payload)
         except Exception as e:
             return _batch_error(e)

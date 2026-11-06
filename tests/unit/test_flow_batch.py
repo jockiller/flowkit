@@ -179,6 +179,27 @@ class TestVideoRequest:
         assert request[4][1] == "start"
         assert request[5][1] == "end"
 
+    def test_veo_first_last_matches_the_live_capture(self):
+        """Captured off the Flow UI on 2026-11-06 (Veo 3.1 Fast, 8 s, landscape)."""
+        freq = fb.first_last_request("dog lies down", self.PID, "start", "end",
+                                     "veo_3_1_i2v_s_fast_ultra_fl", aspect="VIDEO_ASPECT_RATIO_LANDSCAPE")
+        assert json.loads(freq)[0][0][0] == fb.RPC_GEN_VIDEO_FIRST_LAST
+        payload = inner(freq)
+        request = payload[0][0]
+        assert request[0] == [None, None, [[["dog lies down"]]]]
+        assert request[1:4] == ["veo_3_1_i2v_s_fast_ultra_fl", fb.VIDEO_ASPECT_LANDSCAPE, None]
+        assert request[4] == [None, "start", None, None, None, [None, None, 1, 1]]
+        assert request[5] == [None, "end", None, None, None, [None, None, 1, 1]]
+        assert request[6][:4] == [None, None, None, None]
+        assert payload[1][1] == fb.SURFACE_ID and payload[1][5] == self.PID
+        assert payload[2][1] == 2
+
+    def test_first_last_model_falls_back_to_a_captured_name(self):
+        assert fb.resolve_first_last_model("veo_3_1_i2v_s_fl") == "veo_3_1_i2v_s_fl"
+        assert fb.resolve_first_last_model("veo_3_1_i2v_s_fast_fl") == "veo_3_1_i2v_s_fast_ultra_fl"
+        assert fb.resolve_first_last_model("veo_3_1_i2v_s_lite_4s_fl") == "veo_3_1_i2v_s_fast_ultra_fl"
+        assert fb.resolve_first_last_model(None) == fb.FIRST_LAST_VIDEO_MODEL
+
     def test_omni_reference_matches_live_mzza6b_shape(self):
         freq = fb.omni_reference_video_request(
             "keep refs", self.PID, ["a", "b"], duration_s=4, resolution="360p",

@@ -263,22 +263,21 @@ class TestGenerateVideo:
         await client.generate_video("mid", "go", PROJECT, "scene-1")
         assert client._operation_projects[OPERATION] == PROJECT
 
-    async def test_chaining_fails_loudly_rather_than_dropping_the_end_frame(self, client):
-        result = await client.generate_video("mid", "go", PROJECT, "scene-1",
-                                             end_image_media_id="end-mid")
-        assert "UNSUPPORTED_ON_BATCH_API" in result["error"]
-        assert not client.calls, "nothing should have been sent"
-
-    async def test_degraded_mode_runs_i2v_off_the_start_frame(self, client, monkeypatch):
-        import agent.services.flow_client as module
-        monkeypatch.setattr(module, "FLOW_ALLOW_DEGRADED", True)
-        client.responses[fb.RPC_GEN_VIDEO] = self._submitted(client)
-
+    async def test_an_end_frame_submits_veo_start_and_end_frames(self, client):
+        client.responses[fb.RPC_GEN_VIDEO_FIRST_LAST] = {
+            "data": envelope(fb.RPC_GEN_VIDEO_FIRST_LAST, [None, 50, [[OPERATION, PROJECT, "scene", None]]])}
         result = await client.generate_video("start-mid", "go", PROJECT, "scene-1",
+                                             aspect_ratio="VIDEO_ASPECT_RATIO_LANDSCAPE",
                                              end_image_media_id="end-mid")
+
         assert not _is_error(result)
-        payload = json.loads(json.loads(client.calls[0]["freq"])[0][0][1])
-        assert payload[0][0][4][1] == "start-mid"
+        assert result["data"]["operations"][0]["operation"]["name"] == OPERATION
+        assert client.calls[0]["rpcid"] == fb.RPC_GEN_VIDEO_FIRST_LAST
+        assert client.calls[0]["captcha"] == fb.CAPTCHA_VIDEO
+        request = json.loads(json.loads(client.calls[0]["freq"])[0][0][1])[0][0]
+        assert request[1] in fb.FIRST_LAST_VIDEO_MODELS
+        assert request[4][1] == "start-mid"
+        assert request[5][1] == "end-mid"
 
     async def test_r2v_fails_loudly_by_default(self, client):
         result = await client.generate_video_from_references(["a", "b"], "go", PROJECT, "s")

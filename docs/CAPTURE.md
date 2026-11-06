@@ -21,8 +21,10 @@ request bodies to disk, so it goes in for one session and comes straight back ou
 | media id → urls | `as29s` | signed `/video/` + poster `/image/` |
 | upload an image | `maseQ` | base64 in the payload, captcha like a generate |
 
-Missing, and each blocked behind a capture: **video upscale**, **r2v**,
-**start+end-frame chaining**, and the **base-image** variant of the image edit.
+Missing, and each blocked behind a capture: **video upscale**, **r2v**, and the
+**base-image** variant of the image edit. Veo **start+end-frame chaining** was
+captured on 2026-11-06: `nprQif`, the Omni first+last shape with a Veo `_fl`
+model (`veo_3_1_i2v_s_fast_ultra_fl`, 8 s).
 
 ## Recording one
 

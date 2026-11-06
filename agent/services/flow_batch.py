@@ -117,6 +117,14 @@ VIDEO_MODELS = {
     "veo_3_1_i2v_s_fast_ultra",
 }
 
+#: Veo start+end frame models (RPC ``nprQif``), 8 s. Unlike plain i2v the
+#: ``_fl`` chaining marker is part of the name: Fast on the Ultra plan says
+#: ``fast_ultra_`` (plain ``fast_`` is refused with MODEL_ACCESS_DENIED) and
+#: Quality says nothing. Only names captured off the live UI go here —
+#: 2026-11-06: Fast 8 s (default), Quality 8 s.
+FIRST_LAST_VIDEO_MODEL = "veo_3_1_i2v_s_fast_ultra_fl"
+FIRST_LAST_VIDEO_MODELS = {FIRST_LAST_VIDEO_MODEL, "veo_3_1_i2v_s_fl"}
+
 #: Video aspect, and note it does NOT share the image encoding: here 1 is
 #: portrait, where for an image 1 is square. Measured by rendering one of each
 #: from the same portrait still — 720x1280 against 1280x720.
@@ -244,6 +252,11 @@ def resolve_video_model(key: Optional[str]) -> str:
         if "lite" in key:
             return "veo_3_1_i2v_lite"
     return VIDEO_MODEL
+
+
+def resolve_first_last_model(key: Optional[str]) -> str:
+    """A captured Veo start+end model name, else the default one."""
+    return key if key in FIRST_LAST_VIDEO_MODELS else FIRST_LAST_VIDEO_MODEL
 
 
 def resolve_aspect(aspect: Any) -> int:
@@ -486,6 +499,19 @@ def omni_first_last_request(prompt: str, project_id: str,
     if res not in {"360p", "720p"}:
         raise ValueError("Omni resolution must be 360p or 720p")
     model = f"omni_flash_i2v_{duration_s}s_first_last" + ("_360p" if res == "360p" else "")
+    return first_last_request(prompt, project_id, start_media_id, end_media_id, model,
+                              aspect=aspect, start_crop=start_crop, end_crop=end_crop)
+
+
+def first_last_request(prompt: str, project_id: str, start_media_id: str, end_media_id: str,
+                       model: str, *, aspect: Any = VIDEO_ASPECT_LANDSCAPE,
+                       start_crop: Optional[list] = None,
+                       end_crop: Optional[list] = None) -> str:
+    """Build a start+end frames submit (RPC ``nprQif``), shared by Omni and Veo.
+
+    Live-captured for Veo 3.1 on 2026-11-06: the same shape as Omni's, with the
+    end frame in the slot right after the start frame.
+    """
     request = [
         [None, None, [[[prompt]]]],
         model,
