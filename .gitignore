@@ -35,3 +35,8 @@ flow_session_project.json
 scratch/
 
 series_manifest.json
+
+# local runtime
+venv/
+flowkit.log
+flowkit.pid
