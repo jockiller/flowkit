@@ -710,9 +710,12 @@ async function runBatchRpc(cmd) {
       // image generation when source-path is missing even though Lite may not.
       const sourcePath = location.pathname || '/';
       const hl = (document.documentElement.lang || navigator.language || 'en').split('-')[0];
+      // Multi-login: a tab on /u/N/... is account N; without the prefix the
+      // request runs as the default account (/u/0) with this page's `at` token.
+      const userPrefix = (sourcePath.match(/^\/u\/\d+(?=\/)/) || [''])[0];
       const url = customPath
-        ? `${customPath}?bl=${encodeURIComponent(bl || '')}&f.sid=${encodeURIComponent(sid || '')}&hl=${encodeURIComponent(hl)}&_reqid=${reqid}&rt=c`
-        : `/_/AiSandboxAngularFrontend/data/batchexecute?rpcids=${encodeURIComponent(rpcid)}` +
+        ? `${userPrefix}${customPath}?bl=${encodeURIComponent(bl || '')}&f.sid=${encodeURIComponent(sid || '')}&hl=${encodeURIComponent(hl)}&_reqid=${reqid}&rt=c`
+        : `${userPrefix}/_/AiSandboxAngularFrontend/data/batchexecute?rpcids=${encodeURIComponent(rpcid)}` +
           `&source-path=${encodeURIComponent(sourcePath)}` +
           `&bl=${encodeURIComponent(bl || '')}&f.sid=${encodeURIComponent(sid || '')}` +
           `&hl=${encodeURIComponent(hl)}&_reqid=${reqid}&rt=c`;
